@@ -1,4 +1,5 @@
 package com.sheryians.major.controller;
+import com.sheryians.major.dto.ProductDTO;
 import com.sheryians.major.model.Category;
 import com.sheryians.major.repository.ProductRepository;
 import com.sheryians.major.service.CategoryService;
@@ -75,7 +76,7 @@ public class AdminController {
         Product product = new Product();
         product.setId(productDTO.getId());
         product.setName(productDTO.getName());
-        product.setCategory(categoryService.getCategoryById(productDTO.getCategoryId()).get());
+        product.setCategoryId(categoryService.getCategoryById(productDTO.getCategoryId()).get());
         product.setPrice(productDTO.getPrice());
         product.setWeight(productDTO.getWeight());
         product.setDescription(productDTO.getDescription());
@@ -91,18 +92,34 @@ public class AdminController {
         productService.addProduct(product);
         return "redirect:/admin/products";
     }
-    /*@GetMapping("/admin/categories/delete/{id}")
-    public String deleteCat(@PathVariable int id){
-        categoryService.removeCategoryById(id);
-        return "redirect:/admin/categories";
+    @GetMapping("/admin/products/delete/{id}")
+    public String deleteProduct(@PathVariable long id){
+        productService.removeProductById(id);
+        return "redirect:/admin/products";
     }
-    @GetMapping("/admin/categories/update/{id}")
-    public String updateCat(@PathVariable int id, Model model){
-        Optional<Category> category = categoryService.getCategoryById(id);
-        if(category.isPresent()){
-            model.addAttribute("category", category.get());
-            return "categoriesAdd";
-        }
-        else return "404";
-    }*/
+    @GetMapping("/admin/products/update/{id}")
+    public String updateProduct(@PathVariable long id, Model model){
+        Product product = productService.getProductById(id).get();
+
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setId(product.getId());
+        productDTO.setName(product.getName());
+        productDTO.setCategoryId((product.getCategory().get()));
+        productDTO.setPrice(product.getPrice());
+        productDTO.setWeight(product.getWeight());
+        productDTO.setDescription(product.getDescription());
+        productDTO.setImageName(product.getImageNam());
+
+        model.addAttribute("categories", categoryService.getAllCategory());
+        model.addAttribute("productDTO", productDTO);
+
+        return "productsAdd";
+//        if(category.isPresent()){
+//            model.addAttribute("category", category.get());
+//
+//
+//            return "categoriesAdd";
+//        }
+//        else return "404";
+//    }
 }
