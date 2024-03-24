@@ -5,6 +5,9 @@ import com.sun.tracing.dtrace.ModuleAttributes;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Optional;
+
 @Controller
 public class AdminController {
     @Autowired
@@ -13,19 +16,33 @@ public class AdminController {
     public String adminHome(){
         return "adminHome";
     }
-    @GetMapping("/admin.categories")
+    @GetMapping("/admin/categories")
     public String getCat(Model model){
         model.addttribute("categories", categoryService.getAllCategory());
         return "categories";
     }
-    @GetMapping("/admin.categories/add")
+    @GetMapping("/admin/categories/add")
     public String getCatAdd(Model model){
         model.addAttribute("category", new Category());
         return "categoriesAdd";
     }
-    @PostMapping("/admin.categories/add")
+    @PostMapping("/admin/categories/add")
     public String postCatAdd(@ModelAttribute("category")Category category){
         categoryService.addCategory(category);
         return "redirect:/admin/categories";
+    }
+    @GetMapping("/admin/categories/delete/{id}")
+    public String deleteCat(@PathVariable int id){
+        categoryService.removeCategoryById(id);
+        return "redirect:/admin/categories";
+    }
+    @GetMapping("/admin/categories/update/{id}")
+    public String updateCat(@PathVariable int id, Model model){
+        Optional<Category> category = categoryService.getCategoryById(id);
+        if(category.isPresent()){
+            model.addAttribute("category", category.get());
+            return "categoriesAdd";
+        }
+        else return "404";
     }
 }
