@@ -9,6 +9,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 @Controller
@@ -63,12 +67,30 @@ public class AdminController {
         model.addAttribute("categories", categoryService.getAllCategory());
         return "productAdd";
     }
-    @PostMapping("/admin/categories/add")
-    public String postCatAdd(@ModelAttribute("category")Category category){
-        categoryService.addCategory(category);
-        return "redirect:/admin/categories";
+    @PostMapping("/admin/products/add")
+    public String productAddPost(@ModelAttribute("productDTO")ProductDTO,
+                                 @RequestParam("productImage")MultipartFile file,
+                                 @RequestParam("imgName")String imgName ) throws IOException {
+        Product product = new Product();
+        product.setId(productDTO.getId());
+        product.setName(productDTO.getName());
+        product.setCategory(categoryService.getCategoryById(productDTO.getCategoryId()).get());
+        product.setPrice(productDTO.getPrice());
+        product.setWeight(productDTO.getWeight());
+        product.setDescription(productDTO.getDescription());
+        String imageUUID;
+        if(!file.isEmpty()){
+            imageUUID = file.getOriginalFilename();
+            Path fileNameAndPath = Paths.get(uploadDir, imageUUID);
+            Files.write(fileNameAndPath, file.getBytes());
+        } else {
+            imageUUID = imageName;
+        }
+        product.setImageName(imageUUID);
+        productService.addProduct(product);
+        return "redirect:/admin/products";
     }
-    @GetMapping("/admin/categories/delete/{id}")
+    /*@GetMapping("/admin/categories/delete/{id}")
     public String deleteCat(@PathVariable int id){
         categoryService.removeCategoryById(id);
         return "redirect:/admin/categories";
@@ -81,5 +103,5 @@ public class AdminController {
             return "categoriesAdd";
         }
         else return "404";
-    }
+    }*/
 }
